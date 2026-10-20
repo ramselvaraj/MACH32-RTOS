@@ -1,0 +1,6 @@
+[submodule "vendor/MACH32"]
+	path = vendor/MACH32
+	url = https://github.com/ramselvaraj/MACH32.git
+[submodule "vendor/FreeRTOS-Kernel"]
+	path = vendor/FreeRTOS-Kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git

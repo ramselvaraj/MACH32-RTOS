@@ -1,0 +1,26 @@
+name: Firmware and host tests
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install the compiler
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi
+      - name: Run host tests
+        run: make test test-sanitize check-python
+      - name: Build firmware with outputs disabled
+        run: make -j2 verify
+      - name: Build firmware with test hooks
+        run: make -j2 verify ENABLE_TEST_HOOKS=1
+      - name: Build firmware with outputs enabled
+        run: make -j2 verify MOTOR_OUTPUT_ENABLED=1
+      - name: Build firmware with outputs and test hooks enabled
+        run: make -j2 verify MOTOR_OUTPUT_ENABLED=1 ENABLE_TEST_HOOKS=1
