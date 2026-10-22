@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MACH32 / Final wiring</title><style>
+body{margin:0;color:#061b32;background:white;font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:35px}h1,h2{letter-spacing:-.7px}header{border-bottom:1px solid #72849b;margin-bottom:25px}small,.muted{color:#61738c}.panel{background:#edf3fa;padding:22px;border-radius:10px;margin:22px 0}.warning{border-left:4px solid #b46b23;padding:12px 20px;background:#fff6e9}svg{width:100%;height:auto}svg text{font:15px monospace;fill:#061b32}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #ccd7e4}code{font-weight:bold}.scroll{overflow:auto}a{color:#17568b}@media print{main{padding:0}.panel{break-inside:avoid}body{font-size:12px}}
+</style></head><body><main>
+<header><small>MACH32 RTOS / HARDWARE REFERENCE</small><h1>Final motor-controller wiring</h1><p>NUCLEO-F446RE · L293D · potentiometer · HW-131 · DC motor</p></header>
+<p class="warning"><strong>Disconnect STM32 USB and the battery before changing wiring.</strong> This is the final connection plan used during bench bring-up, not an electrical certification. Motor stall current and regulator output were not measured. Never connect the 9 V battery directly to the motor. PWM duty limiting is not current protection.</p>
+<section class="panel"><h2>01 / Power and signal diagram</h2><p>Labels specify electrical connections; this overview is not a physical connector map. Exact sockets and breadboard holes follow below.</p>
+<svg viewBox="0 0 1050 480" role="img" aria-label="USB powers Nucleo and L293D logic. Nine volt battery powers separate HW-131 regulator, whose fixed five volt output powers L293D motor supply. Grounds are shared, positive supplies are separate.">
+<g fill="#fff" stroke="#70839d" stroke-width="2"><rect x="15" y="40" width="250" height="270" rx="8"/><rect x="420" y="40" width="250" height="270" rx="8"/><rect x="800" y="40" width="235" height="100" rx="8"/><rect x="800" y="205" width="235" height="105" rx="8"/><rect x="15" y="365" width="250" height="95" rx="8"/></g>
+<g><text x="35" y="68">NUCLEO / ST-LINK USB</text><text x="35" y="110">PA6 / D12</text><text x="35" y="150">PB0 / A3</text><text x="35" y="190">PB1 / CN10.24</text><text x="35" y="230">5V / logic only</text><text x="35" y="285">GND</text><text x="440" y="68">L293D / notch up</text><text x="440" y="110">1 EN1</text><text x="440" y="150">2 IN1</text><text x="440" y="190">7 IN2</text><text x="440" y="230">16 VCC1</text><text x="440" y="285">4,5,12,13 GND</text><text x="575" y="110">3 OUT1</text><text x="575" y="150">6 OUT2</text><text x="575" y="250">8 VM</text><text x="820" y="70">DC MOTOR</text><text x="820" y="103">Two terminals</text><text x="820" y="232">HW-131 / separate</text><text x="820" y="263">Fixed 5V → pin 8</text><text x="820" y="290">9V → barrel input</text><text x="35" y="390">POTENTIOMETER</text><text x="35" y="417">Outside: 3V3 and GND</text><text x="35" y="444">Center: PA0 / A0</text></g>
+<g fill="none" stroke="#17568b" stroke-width="3"><path d="M265 105H420 M265 145H420 M265 185H420"/><path d="M670 105H800 M670 145H750V120H800"/></g><path d="M265 225H420" fill="none" stroke="#a84645" stroke-width="3"/><path d="M800 250H670" fill="none" stroke="#b46b23" stroke-width="3"/><g fill="none" stroke="#61738c" stroke-width="3"><path d="M265 280H420 M350 280V340H930V310 M545 310V340"/></g><text x="420" y="380">Common ground; separate +5V sources.</text><text x="420" y="414">EN1 → 10 kΩ → GND</text><text x="420" y="444">100 nF from each supply pin to GND</text>
+</svg></section>
+<h2>02 / Exact breadboard layout</h2>
+<p>Keep the orientation used during assembly: <strong>row 60 near the top; chip notch toward the top.</strong> Left-to-right columns are <strong>J I H G F | gap | E D C B A</strong>. Chip legs occupy F56–F49 and E56–E49. Each numbered row connects five holes on each side separately. <strong>J is not a ground column.</strong></p>
+<div class="panel"><pre style="overflow:auto;font:16px/1.7 monospace">                  NOTCH ↑
+             F             E
+ row 56   1 EN1 ┌───∪───┐ 16 logic 5V
+ row 55   2 IN1 │       │ 15 unused input → GND
+ row 54   3 OUT1│ L293D │ 14 unused output: NC
+ row 53   4 GND │       │ 13 GND
+ row 52   5 GND │       │ 12 GND
+ row 51   6 OUT2│       │ 11 unused output: NC
+ row 50   7 IN2 │       │ 10 unused input → GND
+ row 49   8 VM  └───────┘  9 unused enable → GND</pre></div>
+<p><strong>G1–G5</strong> are guide labels, not printed breadboard coordinates: use the <strong>second group of five holes from the top on the LEFT blue − rail</strong>, numbered top-to-bottom. All five must share one rail segment. Do not assume separate rail groups are connected.</p>
+<div class="scroll"><table><thead><tr><th>Connection</th><th>Exact endpoints</th></tr></thead><tbody>
+<tr><td>Chip grounds</td><td>J53 → G1; J52 → G2; A53 → G3; A52 → G4</td></tr>
+<tr><td>Unused half disabled</td><td>A49 → B53; A50 → B52; A55 → C53</td></tr>
+<tr><td>Enable pull-down</td><td>10 kΩ resistor: H56 ↔ H53</td></tr>
+<tr><td>Logic decoupling</td><td>100 nF ceramic (104): D56 ↔ D53</td></tr>
+<tr><td>Motor supply decoupling</td><td>100 nF ceramic (104): I49 ↔ I52</td></tr>
+<tr><td>STM32 ground</td><td>CN6 pin 6 GND → G5</td></tr>
+<tr><td>PWM enable</td><td>CN5 pin 5 / D12 / PA6 → J56</td></tr>
+<tr><td>Direction 1</td><td>CN8 pin 4 / A3 / PB0 → J55</td></tr>
+<tr><td>Direction 2</td><td>CN10 pin 24 / PB1 → J50</td></tr>
+<tr><td>Logic supply</td><td>CN6 pin 5 / STM32 5V → A56</td></tr>
+<tr><td>External supply ground</td><td>HW-131 fixed GND → D52</td></tr>
+<tr><td>External motor supply</td><td>HW-131 fixed 5V → J49</td></tr>
+<tr><td>Motor terminals</td><td>One terminal → J54; other terminal → J51</td></tr>
+</tbody></table></div>
+<p>NC means no connection. Leave E54's row (unused output 14) and E51's row (unused output 11) unconnected. Capacitors are not wires and must not be replaced by jumpers. Either orientation works for these ceramic capacitors and the resistor.</p>
+<h2>03 / Find the actual STM32 sockets</h2>
+<p>Top view, <strong>ST-LINK USB socket at the top</strong>. Use the inner female Arduino sockets except for PB1.</p>
+<div class="scroll"><table><tr><th>Header</th><th>Top → bottom / physical identification</th></tr>
+<tr><td>CN6, left inner POWER strip</td><td>1 NC · 2 IOREF · 3 NRST · <strong>4 3V3 · 5 5V · 6 GND · 7 GND</strong> · 8 VIN</td></tr>
+<tr><td>CN8, left inner ANALOG strip</td><td><strong>1 A0</strong> · 2 A1 · 3 A2 · <strong>4 A3</strong> · 5 A4 · 6 A5</td></tr>
+<tr><td>CN5, upper right inner strip</td><td>D15 · D14 · AVDD · GND · D13 · <strong>D12</strong> · D11 · D10 · D9 · D8. D12 is header pin 5.</td></tr>
+<tr><td>CN10, far-right exposed two-column strip</td><td><strong>PB1 = outer-right pin of pair 12</strong>, counting pairs from the top. This is CN10 pin 24. Use a female-to-male jumper.</td></tr></table></div>
+<p class="warning"><strong>CN10 pin 24 is PB1. CN7 pin 24 is VIN—not PB1.</strong> Do not confuse the two connectors or count individual pins as pairs.</p>
+<h2>04 / Knob and motor power module</h2>
+<div class="panel"><h3>Knob: three terminals, no polarity markings needed</h3><p>Middle terminal → <strong>A0 / PA0 / CN8 pin 1</strong>. One outside terminal → <strong>3V3 / CN6 pin 4</strong>. Other outside terminal → <strong>GND</strong> (CN6 pin 7 is a separate available ground socket). Any other existing STM32 GND connection is electrically equivalent; do not put two jumper pins in one socket.</p><p>Swapping the outside terminals reverses the knob direction. <strong>Never feed 5V into this ADC connection.</strong></p></div>
+<div class="panel"><h3>HW-131: use the fixed output header, not the breadboard rail contacts</h3><p>Orient this module with the barrel jack at upper right and USB-A socket below it, matching the assembly session. Read its printed labels; variants can differ.</p><pre style="font:16px/1.8 monospace;overflow:auto">Central 8-pin header, top view:
+
+         3.3V   3.3V    5V     5V ← to J49 (L293D pin 8)
+         GND    GND     GND    GND ← to D52 (common ground)</pre><p>The two highlighted connections are the <strong>rightmost vertical pair</strong>. They are separate output pins: do NOT bridge them with a jumper cap. Leave the rail-selector jumpers unchanged; their underside rail contacts are unused. Keep the module separate from the breadboard and its underside pins clear of metal.</p><p><strong>9V battery → snap-to-barrel lead → DC-in jack.</strong> The module's fixed regulated 5V output supplies the driver motor input. Its USB-A socket is unused. Use the battery snap as an accessible physical disconnect.</p></div>
+<p><strong>The Nucleo 5V and external module 5V must NOT be joined.</strong> Nucleo 5V supplies L293D pin 16 only; external 5V supplies pin 8 only. Their grounds ARE joined. Neither motor terminal connects directly to a power rail.</p>
+<h2>05 / Operation and limits</h2>
+<ul><li>Firmware defaults to motor output disabled and a 25% maximum duty. A separate 50%-limit motion-enabled build was used during bring-up. Wiring does not determine which build is flashed: check <code>STATUS</code> fields <code>outputs</code> and <code>limit</code>.</li><li><code>ARM POT</code> enables continuous forward-only knob control. It continues without a host heartbeat; closing a dashboard does not stop it. <code>STOP</code> requests an output stop; disconnect motor power for a physical stop.</li><li>Knob position controls PWM demand, not measured RPM. No encoder or current sensor is present. If the motor only buzzes without rotating, remove motor power; do not leave it stalled.</li><li>Secure the motor, remove any exposed fan blade, keep its shaft clear, and disconnect if the driver, regulator, battery or motor heats abnormally. Do not leave the bench running unattended.</li></ul>
+<p class="muted">Basic motor movement and input/firmware bring-up were demonstrated. This diagram does not establish sustained-load reliability, stall-current compatibility, measured regulator voltage, or worst-case timing. The 9V/regulator arrangement follows the kit tutorial, not a universal recommendation for unidentified motors.</p>
+<p>References: <a href="https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf">ST UM1724 (F446RE Arduino/Morpho pinouts)</a> · <a href="https://www.ti.com/lit/ds/symlink/l293.pdf">L293D datasheet</a> · <a href="https://docs.freenove.com/projects/fnk0020/en/latest/fnk0020/codes/c-lang/Motor%20%26%20Driver.html">Freenove FNK0020 motor tutorial</a></p>
+<footer class="muted">Standalone reference: all graphics and styles are embedded. No personal photos, external fonts, scripts, or other local files are required.</footer>
+</main></body></html>
